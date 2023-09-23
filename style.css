@@ -30,6 +30,10 @@ button {
     text-align: right;
 }
 
+#display #history {
+    font-size: .8em;
+}
+
 .buttons {
     display: flex;
 }
