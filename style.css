@@ -1,5 +1,45 @@
-button {
-    width: 24px;
-    height: 24px;
+:root {
+    --base-button-size: 35px;
 }
 
+.calculator {
+    padding: 20px;
+    border: 1px solid black;
+    width: 200px;
+}
+
+button {
+    width: var(--base-button-size);
+    height: var(--base-button-size);
+}
+
+.width-2x {
+    width: calc( var(--base-button-size) * 2 );
+}
+
+.height-2x {
+    height: calc( var(--base-button-size) * 2 );
+}
+
+#display > div {
+    height: 25px;
+    background-color: white;
+    border: 1px solid black;
+    margin-bottom: 5px;
+    padding: 5px;
+    text-align: right;
+}
+
+.buttons {
+    display: flex;
+}
+
+#numbers {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#operators, #calc-operations {
+    display: flex;
+    flex-direction: column;
+}

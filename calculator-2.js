@@ -1,59 +1,158 @@
 
-let num1 = 0;
-let num2 = 0;
-let operationObj = null;
-let result;
-let continuingCalculation = false;
+/* DOM Elements & Event Listeners */
 
 const numberButtons = document.getElementById('numbers');
-numberButtons.addEventListener( 'click', queueOperand);
+numberButtons.addEventListener( 'click', handleOperand);
+
 const operatorButtons = document.getElementById('operators');
-operatorButtons.addEventListener( 'click', queueOperator);
+operatorButtons.addEventListener( 'click', handleOperator);
+
 const equalsButton = document.getElementById('equals');
 equalsButton.addEventListener('click', calculate);
+
+const allClearButton = document.getElementById('all-clear');
+allClearButton.addEventListener('click', allClear);
+
+const clearEntryButton = document.getElementById('clear-entry');
+clearEntryButton.addEventListener('click', clearEntry);
+
 const historyDisplay = document.getElementById('history');
 const resultDisplay = document.getElementById('result');
 
-function queueOperand(e) {
+
+
+/* Calculation Object */
+
+const calc = {
+    num1: '0',
+    num2: '0',
+    op: null,
+    currentNum: 'num1', // unused atm
+    continuingCalculation: false
+};
+
+let result;
+
+const display = {
+    main: '',
+    sub: ''
+};
+
+
+/* Processing User Input */
+
+function handleOperand(e) {
     if (e.target.id === 'numbers') return; // ignores clicks on container div
 
-    const newNumber = e.target.id;
-    if (operationObj === null && continuingCalculation === true) {
-        num1 = 0;
-        num1 = newNumber;
-        continuingCalculation = false;
-        console.log(`Num1: ${Number(num1)}`);
-    } else if (operationObj === null) {
-        num1 += newNumber;
-        console.log(`Num1: ${Number(num1)}`);
+    const newNum = e.target.textContent;
+
+
+    if (calc.op === null && calc.continuingCalculation === true) {
+        calc.num1 = '0' + newNum;
+        calc.continuingCalculation = false;
+        console.log(`Num1: ${Number(calc.num1)}`);
+        display.sub = '';
+        display.main = calc.num1.substring(1);
+    } else if (calc.op === null) {
+        if (newNum === '.' && calc.num1.includes('.')) return;
+
+        calc.num1 += newNum;
+        console.log(`Num1: ${calc.num1}`);
+        display.sub = '';
+        display.main = calc.num1.substring(1);
     } else {
-        num2 += newNumber;
-        console.log(`Num2: ${Number(num2)}`);
+        if (newNum === '.' && calc.num2.includes('.')) return;
+
+        calc.num2 += newNum;
+        console.log(`Num2: ${Number(calc.num2)}`);
+        display.main = calc.num2.substring(1);
     }
+
+    updateDisplay();
 }
 
-function queueOperator(e) {
+function handleOperator(e) {
     if (e.target.id === 'operators') return; // ignores clicks on container div
 
-    operationObj = operations.find( (operation) => operation.name === e.target.id );
-    console.log(operationObj);
+    calc.op = operations.find( operation => operation.name === e.target.id );
+
+    display.sub = `${Number(calc.num1)} ${calc.op.symbol}`;
+    display.main = '';    
+    console.log(calc.op);
+
+    updateDisplay();
 }
+
+/* Data Processing */
 
 function calculate() {
-    const operationName = operationObj.name;
-    result = operationObj[operationName](Number(num1), Number(num2));
-    console.log(`${Number(num1)} ${operationObj.symbol} ${Number(num2)} = ${result}`);
+    if (!readyToCalculate()) return;
+    if (divideByZero()) return;
 
-    resetForNextCalculation()
+    const opName = calc.op.name;
+    result = calc.op[opName](Number(calc.num1), Number(calc.num2));
+    display.sub = `${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} =`;
+    display.main = result;
+    console.log(`${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} = ${result}`);
+    
+    updateDisplay();
+    prepareForNextCalculation();
 }
 
-function resetForNextCalculation() {
-    num1 = result;
-    num2 = 0;
+function readyToCalculate() {
+    if (calc.op === null) return false;
+    if (calc.num2.length < 2) return false;
+    
+    console.log('ready to calculate...');
+    return true;
+}
+
+function divideByZero() {
+    if (calc.op.name === 'divide' && Number(calc.num2) === 0) {
+        display.sub = `${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} =`;
+        display.main = 'ERROR';
+        console.log('Woops! No dividing by zero.');
+
+        updateDisplay();
+        resetCalculation();
+        return true;
+    }
+
+    return false;
+}
+
+function resetCalculation() {
+    calc.num1 = '0';
+    calc.num2 = '0';
+    calc.op = null;
     result = null;
-    operationObj = null;
-    continuingCalculation = true;
 }
+
+function prepareForNextCalculation() {
+    calc.num1 = String(result);
+    calc.num2 = '0';
+    calc.op = null;
+    calc.continuingCalculation = true;
+    result = null;
+}
+
+function allClear() {
+    resetCalculation();
+    display.main = '';
+    display.sub = '';
+    updateDisplay();
+}
+
+function clearEntry() {
+
+}
+
+/* Data Output */
+function updateDisplay() {
+    resultDisplay.textContent = display.main;
+    historyDisplay.textContent = display.sub;
+}
+
 
 const operations = [
     {
