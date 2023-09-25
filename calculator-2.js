@@ -54,6 +54,8 @@ document.addEventListener('keydown', (e) => {
             handleOperand(e);
         } else if (e.key === '=' || e.key === 'Enter') {
             calculate();
+        } else if (e.key === 'Backspace') {
+            clearLastEntry();
         } else {
             handleOperator(e);
         }
@@ -127,6 +129,8 @@ function handleOperator(e) {
         calculate();
     }
 
+    calc.calculationInProgress = false;
+
     const userInput = processUserInputFromEvent(e, 'operator');
 
     // calc.op = operations.find( operation => operation.name === e.target.id );
@@ -134,7 +138,7 @@ function handleOperator(e) {
     calc.op = userInput;
 
     display.sub = `${Number(calc.num1)} ${calc.op.symbol}`;
-    display.main = '';    
+    display.main = '';
     console.log(calc.op);
 
     updateDisplay();
