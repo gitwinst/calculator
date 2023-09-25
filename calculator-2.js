@@ -11,18 +11,17 @@ numberButtons.addEventListener( 'click', handleOperand);
 const operatorButtons = document.getElementById('operators');
 operatorButtons.addEventListener( 'click', handleOperator);
 
-const equalsButton = document.getElementById('equals');
-equalsButton.addEventListener('click', calculate);
+const calculateButton = document.getElementById('calculate');
+calculateButton.addEventListener('click', calculate);
 
 const allClearButton = document.getElementById('all-clear');
-allClearButton.addEventListener('click', allClear);
+allClearButton.addEventListener('click', clearAllEntries);
 
 const clearEntryButton = document.getElementById('clear-entry');
-clearEntryButton.addEventListener('click', clearEntry);
+clearEntryButton.addEventListener('click', clearLastEntry);
 
 const historyDisplay = document.getElementById('history');
 const resultDisplay = document.getElementById('result');
-
 
 // 
 // 
@@ -34,7 +33,7 @@ const calc = {
     num1: null,
     num2: null,
     op: null,
-    continuingCalculation: false
+    calculationInProgress: false
 };
 
 let result;
@@ -43,6 +42,37 @@ const display = {
     main: '',
     sub: ''
 };
+
+
+
+const keys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '/', '*', '-', '+', '=', 'Backspace', 'Enter'];
+
+document.addEventListener('keydown', (e) => {
+    if (keys.includes(e.key)) {
+        console.log(e.key);
+        if ( Number.isInteger(Number(e.key)) || e.key === '.' ) {
+            handleOperand(e);
+        } else if (e.key === '=' || e.key === 'Enter') {
+            calculate();
+        } else {
+            handleOperator(e);
+        }
+    }
+});
+
+function processUserInputFromEvent(e, type) {
+    if (e.type === 'keydown' && type === 'operand') {
+        return e.key;
+    } else if (type === 'operand') {
+        return e.target.textContent;
+    } else if (e.type === 'keydown' && type === 'operator') {
+        return operations.find( operation => operation.symbol === e.key);
+    } else if (type === 'operator') {
+        return operations.find( operation => operation.name === e.target.id );
+    }
+
+}
+
 
 // 
 // 
@@ -53,13 +83,13 @@ const display = {
 function handleOperand(e) {
     if (e.target.id === 'numbers') return; // ignores clicks on container div
 
-    const userInput = e.target.textContent;
+    const userInput = processUserInputFromEvent(e, 'operand');
 
-    if (calc.op === null && calc.continuingCalculation === true) {
+    if (calc.op === null && calc.calculationInProgress === true) {
 
         calc.num1 = formatInput(calc.num1, userInput);
         
-        calc.continuingCalculation = false;
+        calc.calculationInProgress = false;
 
         console.log(`Num1: ${Number(calc.num1)}`);
         display.sub = '';
@@ -97,7 +127,11 @@ function handleOperator(e) {
         calculate();
     }
 
-    calc.op = operations.find( operation => operation.name === e.target.id );
+    const userInput = processUserInputFromEvent(e, 'operator');
+
+    // calc.op = operations.find( operation => operation.name === e.target.id );
+
+    calc.op = userInput;
 
     display.sub = `${Number(calc.num1)} ${calc.op.symbol}`;
     display.main = '';    
@@ -113,9 +147,9 @@ function handleOperator(e) {
 // 
 
 function formatInput(num, userInput) {
-    if ( (num === null && userInput === '.') || (calc.continuingCalculation === true && userInput === '.') ) {
+    if ( (num === null && userInput === '.') || (calc.calculationInProgress === true && userInput === '.') ) {
         num = '0' + userInput;
-    } else if (num === null || calc.continuingCalculation === true) {
+    } else if (num === null || calc.calculationInProgress === true) {
         num = userInput;
     } else {
         num += userInput;
@@ -130,7 +164,7 @@ function formatInput(num, userInput) {
 
 function calculate() {
     if (!readyToCalculate()) return;
-    if (divideByZero()) return;
+    if (checkDivideByZero()) return;
 
     const opName = calc.op.name;
     result = Number(calc.op[opName](Number(calc.num1), Number(calc.num2)).toFixed(6));
@@ -167,7 +201,7 @@ function readyToCalculate() {
     return true;
 }
 
-function divideByZero() {
+function checkDivideByZero() {
     if (calc.op.name === 'divide' && Number(calc.num2) === 0) {
         display.sub = `${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} =`;
         display.main = 'ERROR';
@@ -192,19 +226,19 @@ function prepareForNextCalculation() {
     calc.num1 = String(result);
     calc.num2 = null;
     calc.op = null;
-    calc.continuingCalculation = true;
+    calc.calculationInProgress = true;
     result = null;
 }
 
-function allClear() {
+function clearAllEntries() {
     resetCalculation();
     display.main = '';
     display.sub = '';
     updateDisplay();
 }
 
-function clearEntry() {
-    if (calc.continuingCalculation) return;
+function clearLastEntry() {
+    if (calc.calculationInProgress) return;
 
     if (calc.num2) {
         calc.num2 = calc.num2.slice(0, calc.num2.length-1);
