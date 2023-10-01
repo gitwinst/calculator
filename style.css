@@ -19,7 +19,7 @@
     --base-button-size: 61px;
     --calc-border: 1px solid #00000033;
 
-    --background-img: url(/download-2.jpeg);
+    --background-img: url(download-2.jpeg);
     --calc-screen-history: #ffffffcc;
     --calc-screen-result: #ffffffee;
     --calc-screen-dashed-border: 1px dashed #00000033;
@@ -297,17 +297,17 @@ button {
 }
 
 :root:has(#light.active) {
-    --background-img: url(/download-3.jpeg);
+    --background-img: url(download-3.jpeg);
     --calc-btn-color: #F5EBE0;
 }
 
 :root:has(#candy.active) {
-    --background-img: url(/download-2.jpeg);
+    --background-img: url(download-2.jpeg);
     --calc-btn-color: #3590F3;
 }
 
 :root:has(#night.active) {
-    --background-img: url(/download-6.jpeg);
+    --background-img: url(download-6.jpeg);
     --calc-screen-history: #00000077;
     --calc-screen-result: #00000099;
     --calc-screen-dashed-border: 1px dashed #ffffff33;
