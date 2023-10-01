@@ -6,6 +6,9 @@
     <title>Document</title>
     <script src="calculator-2.js" defer></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -20,37 +23,49 @@
             <div class="buttons">
                 <div id="numbers">
                     <!-- 1st row -->
-                    <button id="7">7</button>
-                    <button id="8">8</button>
-                    <button id="9">9</button>
+                    <button id="7" class="seven">7</button>
+                    <button id="8" class="eight">8</button>
+                    <button id="9" class="nine">9</button>
                     <!-- 2nd row -->
-                    <button id="4">4</button>
-                    <button id="5">5</button>
-                    <button id="6">6</button>
+                    <button id="4" class="four">4</button>
+                    <button id="5" class="five">5</button>
+                    <button id="6" class="six">6</button>
                     <!-- 3rd row -->
-                    <button id="1">1</button>
-                    <button id="2">2</button>
-                    <button id="3">3</button>
+                    <button id="1" class="one">1</button>
+                    <button id="2" class="two">2</button>
+                    <button id="3" class="three">3</button>
                     <!-- 4th row -->
-                    <button id="0" class="width-2x">0</button>
-                    <button id="decimal">.</button>
+                    <button id="0" class="width-2x zero">0</button>
+                    <button id="." class="decimal">.</button>
                 </div>
 
                 <div id="operators">
-                    <button id="divide">/</button>
-                    <button id="multiply">*</button>
-                    <button id="subtract">-</button>
-                    <button id="add">+</button>
+                    <button id="/">/</button>
+                    <button id="*">*</button>
+                    <button id="-">-</button>
+                    <button id="+" class="border-bottom">+</button>
                 </div>
 
                 <div id="calc-operations">
                     <button id="all-clear">AC</button>
                     <button id="clear-entry">CE</button>
-                    <button id="calculate" class="height-2x">=</button>
+                    <button id="calculate" class="height-2x border-bottom">=</button>
                 </div>
             </div>
 
         </div>
+    </div>
+
+    <div id="color-scheme" class="color-scheme">
+        <button id="light" class="light width-2x inactive">
+            <span>Light</span>
+        </button>
+        <button id="candy" class="candy width-2x active">
+            <span>Candy</span>
+        </button>
+        <button id="night" class="night width-2x inactive">
+            <span>Night</span>
+        </button>
     </div>
 </body>
 </html>

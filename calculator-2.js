@@ -23,6 +23,48 @@ clearEntryButton.addEventListener('click', clearLastEntry);
 const historyDisplay = document.getElementById('history');
 const resultDisplay = document.getElementById('result');
 
+document.addEventListener('keydown', handleKeyboardInput);
+
+
+
+
+let colorBtns = document.getElementById('color-scheme');
+
+colorBtns.addEventListener('mouseover', (e) => {
+    let btn = e.target.closest('button');
+    if (btn) {
+        Array.from(colorBtns.children).forEach(element => {
+            element.classList.remove('hovered');
+        });
+        btn.classList.add('hovered');
+    }
+    e.stopPropagation();
+});
+
+colorBtns.addEventListener('mouseout', (e) => {
+    let btn = e.target.closest('button');
+    if (btn) {
+        btn.classList.remove('hovered');
+    }
+});
+
+colorBtns.addEventListener('click', (e) => {
+    let btn = e.target.closest('button');
+    if (btn) {
+        Array.from(colorBtns.children).forEach(element => {
+            element.classList.remove('active');
+            element.classList.add('inactive');
+        });
+        btn.classList.add('active');
+        btn.classList.remove('inactive');
+    }
+    e.stopPropagation();
+});
+
+
+
+
+
 // 
 // 
 /* Data Structures */
@@ -43,38 +85,7 @@ const display = {
     sub: ''
 };
 
-
-
 const keys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '/', '*', '-', '+', '=', 'Backspace', 'Enter'];
-
-document.addEventListener('keydown', (e) => {
-    if (keys.includes(e.key)) {
-        console.log(e.key);
-        if ( Number.isInteger(Number(e.key)) || e.key === '.' ) {
-            handleOperand(e);
-        } else if (e.key === '=' || e.key === 'Enter') {
-            calculate();
-        } else if (e.key === 'Backspace') {
-            clearLastEntry();
-        } else {
-            handleOperator(e);
-        }
-    }
-});
-
-function processUserInputFromEvent(e, type) {
-    if (e.type === 'keydown' && type === 'operand') {
-        return e.key;
-    } else if (type === 'operand') {
-        return e.target.textContent;
-    } else if (e.type === 'keydown' && type === 'operator') {
-        return operations.find( operation => operation.symbol === e.key);
-    } else if (type === 'operator') {
-        return operations.find( operation => operation.name === e.target.id );
-    }
-
-}
-
 
 // 
 // 
@@ -87,32 +98,28 @@ function handleOperand(e) {
 
     const userInput = processUserInputFromEvent(e, 'operand');
 
-    if (calc.op === null && calc.calculationInProgress === true) {
+    if (display.main.length > 8) return;
 
+    if (calc.op === null && calc.calculationInProgress === true) {
         calc.num1 = formatInput(calc.num1, userInput);
         
         calc.calculationInProgress = false;
-
-        console.log(`Num1: ${Number(calc.num1)}`);
         display.sub = '';
         display.main = calc.num1;
 
     } else if (calc.op === null) {
-        // checks that num1 is not null, that user just entered '.', and num1 isn't already a float
-        if (calc.num1 && userInput === '.' && calc.num1.includes('.')) return;
+        if ( checkForDecimal(calc.num1, userInput) ) return;
 
         calc.num1 = formatInput(calc.num1, userInput);
 
-        console.log(`Num1: ${calc.num1}`);
         display.sub = '';
         display.main = calc.num1;
 
     } else {
-        if (calc.num2 && userInput === '.' && calc.num2.includes('.')) return;
+        if ( checkForDecimal(calc.num2, userInput) ) return;
 
         calc.num2 = formatInput(calc.num2, userInput);
 
-        console.log(`Num2: ${Number(calc.num2)}`);
         display.main = calc.num2;
     }
 
@@ -122,26 +129,57 @@ function handleOperand(e) {
 function handleOperator(e) {
     if (e.target.id === 'operators') return; // ignores clicks on container div
 
-    if (calc.num1 === null) { // if operator is set before num1, assume num1 is 0
-        calc.num1 = '0';
-    }
-    if (calc.num2 !== null) { // if num2 is set and operator is already set, calculate
-        calculate();
-    }
+    // if operator is set before num1, assume num1 is 0
+    if (calc.num1 === null) calc.num1 = '0';
+
+    // if num2 is set and operator is already set, calculate
+    if (calc.num2 !== null) calculate();
 
     calc.calculationInProgress = false;
 
     const userInput = processUserInputFromEvent(e, 'operator');
 
-    // calc.op = operations.find( operation => operation.name === e.target.id );
-
     calc.op = userInput;
 
     display.sub = `${Number(calc.num1)} ${calc.op.symbol}`;
     display.main = '';
-    console.log(calc.op);
 
     updateDisplay();
+}
+
+function handleKeyboardInput(e) {
+    if (keys.includes(e.key)) {
+        console.log(e.key);
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+
+        if ( Number.isInteger(Number(e.key)) || e.key === '.' ) {
+            handleOperand(e);
+        } else if (e.key === '=' || e.key === 'Enter') {
+            calculate();
+        } else if (e.key === 'Backspace') {
+            clearLastEntry();
+        } else {
+            handleOperator(e);
+        }
+    }
+}
+
+function processUserInputFromEvent(e, type) {
+    let input;
+    if (e.type === 'keydown') {
+        input = e.key;
+    } else {
+        input = e.target.id;
+    }
+
+    if (type === 'operand') {
+        return input;
+    } else {
+        return operations.find( operation => operation.symbol === input);
+    }
 }
 
 // 
@@ -150,18 +188,24 @@ function handleOperator(e) {
 // 
 // 
 
+function checkForDecimal(num, userInput) {
+    if (num && userInput === '.' && num.includes('.')) return true;
+}
+
 function formatInput(num, userInput) {
     if ( (num === null && userInput === '.') || (calc.calculationInProgress === true && userInput === '.') ) {
         num = '0' + userInput;
     } else if (num === null || calc.calculationInProgress === true) {
         num = userInput;
+    } else if (num === '0' && userInput === '0') {
+        num = userInput;
     } else {
         num += userInput;
     }
 
-    if (num.length > 12) {
-        num = num.slice(0, 12);
-    }
+    // if (num.length > 12) {
+    //     num = num.slice(0, 12);
+    // }
 
     return num;
 }
@@ -173,11 +217,15 @@ function calculate() {
     const opName = calc.op.name;
     result = Number(calc.op[opName](Number(calc.num1), Number(calc.num2)).toFixed(6));
     display.sub = `${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} =`;
-    display.main = result;
+    display.main = numberWithCommas(result);
     console.log(`${Number(calc.num1)} ${calc.op.symbol} ${Number(calc.num2)} = ${result}`);
     
     updateDisplay();
     prepareForNextCalculation();
+}
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // 
@@ -187,8 +235,8 @@ function calculate() {
 // 
 
 function updateDisplay() {
-    resultDisplay.textContent = display.main;
-    historyDisplay.textContent = display.sub;
+    resultDisplay.textContent = display.main === null ? display.main : numberWithCommas(display.main);
+    historyDisplay.textContent = numberWithCommas(display.sub);
 }
 
 // 
@@ -223,6 +271,7 @@ function resetCalculation() {
     calc.num1 = null;
     calc.num2 = null;
     calc.op = null;
+    calc.calculationInProgress = false;
     result = null;
 }
 
